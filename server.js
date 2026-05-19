@@ -4,13 +4,27 @@ import connectDB from "./config/db.js";
 import urlRoutes from "./routes/urlRoutes.js";
 
 dotenv.config();
-connectDB();
 
 const app = express();
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send(
+    `<h1>URL Shortener</h1><p>POST /shorten with { "longUrl": "https://example.com" }</p>`
+  );
+});
+
 app.use("/", urlRoutes);
 
-app.listen(process.env.PORT, () =>
-  console.log(`Server running at http://localhost:${process.env.PORT}`)
-);
+// 404 fallback
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found", path: req.path });
+});
+
+const PORT = process.env.PORT || 3000;
+
+connectDB().finally(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
+});
